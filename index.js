@@ -1,64 +1,47 @@
-// index.js
-// where your node app starts
-
-// init project
-var express = require('express');
-var app = express();
-
-// enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
-// so that your API is remotely testable by FCC 
-var cors = require('cors');
-app.use(cors({ optionsSuccessStatus: 200 }));  // some legacy browsers choke on 204
-
+const express = require("express");
+const app = express();
 // http://expressjs.com/en/starter/static-files.html
-app.use(express.static('public'));
+app.use(express.static("public"));
 
 // http://expressjs.com/en/starter/basic-routing.html
-app.get("/", function(req, res) {
-  res.sendFile(__dirname + '/views/index.html');
+app.get("/", function (req, res) {
+  res.sendFile(__dirname + "/views/index.html");
 });
 
-let responseObject = {}
-
-const isDate = function(dateString) {
+// to validate date
+const isDate = function (dateString) {
   let date = new Date(dateString);
-  if (date instanceof Date && isFinite(date.getTime())) {
-    return true;
-  } else {
-    return false;
-  }
-}
-app.get('/api/:input', (request, response) => {
-  let input = request.params.input
+  return date instanceof Date && isFinite(date.getTime());
+};
 
+app.get("/api/:input", (request, response) => {
+  let input = request.params.input;
+  let responseObject = {};
   if (isDate(input)) {
-
-    responseObject['unix'] = new Date(input).getTime()
-    responseObject['utc'] = new Date(input).toUTCString()
+    // got valid date, ex: yyyy-mm-dd
+    responseObject["unix"] = new Date(input).getTime();
+    responseObject["utc"] = new Date(input).toUTCString();
   } else {
-    /* Timestamp */
-
-    input = parseInt(input)
-
-    responseObject['unix'] = new Date(input).getTime()
-    responseObject['utc'] = new Date(input).toUTCString()
+    // got input in unix time, ex:1451001600000
+    input = parseInt(input);
+    responseObject["unix"] = new Date(input).getTime();
+    responseObject["utc"] = new Date(input).toUTCString();
   }
 
-  if (!responseObject['unix'] || !responseObject['utc']) {
-    response.json({ error: 'Invalid Date' })
-  }
-  else
-    response.json(responseObject)
-})
+  if (!responseObject["unix"] || !responseObject["utc"]) {
+    response.json({ error: "Invalid Date" });
+  } else response.json(responseObject);
+});
 
-app.get('/api', (request, response) => {
-  responseObject['unix'] = new Date().getTime()
-  responseObject['utc'] = new Date().toUTCString()
+app.get("/api", (request, response) => {
+  let responseObject = {};
+  responseObject["unix"] = new Date().getTime();
+  responseObject["utc"] = new Date().toUTCString();
 
-  response.json(responseObject)
-})
+  response.json(responseObject);
+});
 
 // listen for requests :)
-var listener = app.listen(process.env.PORT, function() {
-  console.log('Your app is listening on port ' + listener.address().port);
+const listener = app.listen(3000, function () {
+  console.log("Your app is listening on port 3000");
 });
